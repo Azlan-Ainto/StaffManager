@@ -12,9 +12,7 @@ public class PersonalProfil : Profile
         CreateMap<Mitarbeiter, MitarbeiterAntwortDto>();
         CreateMap<Mitarbeiter, MitarbeiterAntwortDto>().ForMember(
                         ziel => ziel.VollerName,
-                        optionen => optionen.MapFrom(
-                            quelle => $"{quelle.Vorname} {quelle.Nachname}"
-                        )
+                        optionen => optionen.MapFrom(quelle => $"{quelle.Vorname} {quelle.Nachname}")
         );
     }
 }

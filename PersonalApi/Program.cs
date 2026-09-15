@@ -3,6 +3,7 @@ using PersonalApi.Datenbank;
 using System.ComponentModel;
 using System;
 using PersonalApi.Zuordnung;
+using PersonalApi.Repositories;
 
 namespace PersonalApi;
 
@@ -12,10 +13,12 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // NEU: Repository im DI-Container registrieren (Scoped = Einmal pro HTTP-Request)
+        builder.Services.AddScoped<IPersonalRepository, PersonalRepository>();
+
         // Datenbankkontext zum Dependency Injection Container hinzufügen.
         // Er liest den Connection-String aus der appsettings.json aus.
-        builder.Services.AddDbContext<PersonalKontext>(
-            optionen =>  optionen.UseSqlServer(builder.Configuration.GetConnectionString("PersonalDatenbankVerbindung")));
+        builder.Services.AddDbContext<PersonalKontext>(optionen =>  optionen.UseSqlServer(builder.Configuration.GetConnectionString("PersonalDatenbankVerbindung")));
 
         builder.Services.AddAutoMapper(cfg =>
         {
@@ -23,7 +26,14 @@ public class Program
         });
 
         // Controller registrieren
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(optionen =>
+        {
+            // ASP.NET Core entfernt standardmäßig die Endung "Async" aus den Aktionsnamen
+            // (aus "Mitarbeiter_Abrufen_Async" wird "Mitarbeiter_Abrufen_").
+            // Dann findet CreatedAtAction(nameof(..._Async), ...) keine passende Route.
+            // Mit "false" bleiben die Aktionsnamen identisch mit den Methodennamen.
+            optionen.SuppressAsyncSuffixInActionNames = false;
+        });
 
         // Swagger registrieren
         builder.Services.AddEndpointsApiExplorer();

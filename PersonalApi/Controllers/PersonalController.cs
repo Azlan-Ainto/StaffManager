@@ -1,97 +1,109 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using PersonalApi.Modelle;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography.X509Certificates;
-using PersonalApi.Datenbank;
-using Microsoft.EntityFrameworkCore;
 using PersonalApi.DTOs;
-using AutoMapper;
-
-
+using PersonalApi.Modelle;
+using PersonalApi.Repositories;
 
 namespace PersonalApi.Controllers;
 
-
 [Route("api/[controller]")]
 [ApiController]
-public class PersonalControlller : ControllerBase
+public class PersonalController : ControllerBase
 {
-    private readonly PersonalKontext datenbankKontext;
+    private readonly IPersonalRepository personalRepository;
     private readonly IMapper mapper;
 
-    public PersonalControlller(PersonalKontext kontext, IMapper mapper)
+    public PersonalController(IPersonalRepository repository,IMapper mapper)
     {
-        datenbankKontext = kontext;
+        personalRepository = repository;
         this.mapper = mapper;
     }
-     
+
+ 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Mitarbeiter>>> AlleMitarbeiterAbrufenAsync()
+    public async Task<ActionResult<IEnumerable<MitarbeiterAntwortDto>>> Alle_Mitarbeiter_Abrufen_Async()
     {
-        var mitarbeiterListe = await datenbankKontext.Mitarbeiter.ToListAsync();
-        var antwortListe = mapper.Map<List<MitarbeiterAntwortDto>>(mitarbeiterListe);     
+        var mitarbeiterListe =  await personalRepository.Hole_Alle_Mitarbeiter_Async();
+
+        var antwortListe =  mapper.Map<List<MitarbeiterAntwortDto>>(mitarbeiterListe);
+
         return Ok(antwortListe);
     }
 
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Mitarbeiter>> EinMitarbeiterAbrufen(int mitarbeiterId)
+    [HttpGet("{arbeiterId}")]
+    public async Task<ActionResult<MitarbeiterAntwortDto>> Mitarbeiter_Abrufen_Async(int arbeiterId)
     {
-        var gesuchterMitarbeiter = await datenbankKontext.Mitarbeiter.FirstOrDefaultAsync(m => m.MitarbeiterId == mitarbeiterId);
 
-        if (gesuchterMitarbeiter != null)
+        var gesuchterMitarbeiter =  await personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+
+        if (gesuchterMitarbeiter == null)
         {
-            return NotFound($"Fehler: Der Mitarbeiter mit der ID {mitarbeiterId} existiert nicht");
+            return NotFound($"Mitarbeiter mit ID {arbeiterId} existiert nicht.");
         }
 
-        return Ok(gesuchterMitarbeiter);
+        var antwort = mapper.Map<MitarbeiterAntwortDto>(gesuchterMitarbeiter);
+
+        return Ok(antwort);
     }
-    
-    // Erstellen
+
+ 
     [HttpPost]
-    public async Task<ActionResult<MitarbeiterErstellenDto>> MitarbeiterAnlegenAsync([FromBody] MitarbeiterErstellenDto neuerArbeiter)
+    public async Task<ActionResult<MitarbeiterAntwortDto>> Mitarbeiter_Anlegen_Async([FromBody] MitarbeiterErstellenDto neuerArbeiter)
     {
+
         var mitarbeiter = mapper.Map<Mitarbeiter>(neuerArbeiter);
-        await datenbankKontext.Mitarbeiter.AddAsync(mitarbeiter);
-        await datenbankKontext.SaveChangesAsync();
 
-        var antwort = mapper.Map<MitarbeiterAntwortDto>(mitarbeiter);
+        await personalRepository.Mitarbeiter_Hinzufuegen_Async(mitarbeiter);
 
-        return CreatedAtAction(
-            nameof(EinMitarbeiterAbrufen), 
-            new { id = antwort.MitarbeiterId }, 
-            antwort
-        );
+        await personalRepository.Aktualisieren_Async();
+
+        var antwort =  mapper.Map<MitarbeiterAntwortDto>(mitarbeiter);
+
+        // Location-Header zeigt auf GET api/Personal/{arbeiterId} des neu angelegten Mitarbeiters
+        return CreatedAtAction(nameof(Mitarbeiter_Abrufen_Async), new { arbeiterId = antwort.MitarbeiterId }, antwort);
     }
-    // Aktualisieren
-    [HttpPut("{id}")]
-    public async Task<IActionResult> MitarbeiterAktualisierenAsync(int id, [FromBody] MitarbeiterAktualisierenDto neueDaten)
+
+
+    [HttpPut("{arbeiterId}")]
+    public async Task<IActionResult> Mitarbeiter_Aktualisieren_Async(int arbeiterId, [FromBody] MitarbeiterAktualisierenDto neueDaten)
     {
-        if (id != neueDaten.MitarbeiterId)
+
+        if (arbeiterId != neueDaten.MitarbeiterId)
         {
             return BadRequest("Die ID in der URL stimmt nicht mit der ID im Datensatz überein.");
         }
-        var gesuchterMitarbeiter = await datenbankKontext.Mitarbeiter.FirstOrDefaultAsync(m => m.MitarbeiterId == id);
+
+        var gesuchterMitarbeiter =  await personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+
+
         if (gesuchterMitarbeiter == null)
         {
-            return NotFound($"Mitarbeiter mit ID {id} nicht gefunden.");
+            return NotFound($"Mitarbeiter mit ID {arbeiterId} nicht gefunden.");
         }
-        mapper.Map(gesuchterMitarbeiter, neueDaten);
-        await datenbankKontext.SaveChangesAsync();
+
+        mapper.Map(neueDaten, gesuchterMitarbeiter);
+
+        await personalRepository.Aktualisieren_Async();
+
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> MitarbeiterLoeschenAsync(int id)
+
+    [HttpDelete("{arbeiterId}")]
+    public async Task<IActionResult>  Mitarbeiter_Loeschen_Async(int arbeiterId)
     {
-        var gesuchterMiarbeiter = await datenbankKontext.Mitarbeiter.FirstOrDefaultAsync(m => m.MitarbeiterId == id);
-        if(gesuchterMiarbeiter == null)
+
+        var gesuchterMitarbeiter = await personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+
+        if (gesuchterMitarbeiter == null)
         {
-            return NotFound($"Mitarbeiter mit ID {id} existiert nicht.");
+            return NotFound($"Mitarbeiter mit ID {arbeiterId} existiert nicht.");
         }
-        datenbankKontext.Mitarbeiter.Remove(gesuchterMiarbeiter);
-        await datenbankKontext.SaveChangesAsync();
+
+        await personalRepository.Mitarbeiter_Loeschen_Async(gesuchterMitarbeiter);
+
+        await personalRepository.Aktualisieren_Async();
 
         return NoContent();
     }
