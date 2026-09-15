@@ -1,0 +1,289 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "PersonalApi",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/PersonalControlller": {
+      "get": {
+        "tags": [
+          "PersonalControlller"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mitarbeiter"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mitarbeiter"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mitarbeiter"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "PersonalControlller"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MitarbeiterErstellenDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MitarbeiterErstellenDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MitarbeiterErstellenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MitarbeiterErstellenDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MitarbeiterErstellenDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MitarbeiterErstellenDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/PersonalControlller/{id}": {
+      "get": {
+        "tags": [
+          "PersonalControlller"
+        ],
+        "parameters": [
+          {
+            "name": "mitarbeiterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mitarbeiter"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mitarbeiter"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mitarbeiter"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "PersonalControlller"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MitarbeiterAktualisierenDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MitarbeiterAktualisierenDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MitarbeiterAktualisierenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "PersonalControlller"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Mitarbeiter": {
+        "required": [
+          "nachname",
+          "vorname"
+        ],
+        "type": "object",
+        "properties": {
+          "mitarbeiterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vorname": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "nachname": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "position": {
+            "type": "string",
+            "nullable": true
+          },
+          "einstellungsdatum": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MitarbeiterAktualisierenDto": {
+        "required": [
+          "mitarbeiterId",
+          "nachname",
+          "vorname"
+        ],
+        "type": "object",
+        "properties": {
+          "mitarbeiterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vorname": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "nachname": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "position": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MitarbeiterErstellenDto": {
+        "required": [
+          "nachname",
+          "vorname"
+        ],
+        "type": "object",
+        "properties": {
+          "vorname": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "nachname": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "position": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "PersonalControlller"
+    }
+  ]
+}
