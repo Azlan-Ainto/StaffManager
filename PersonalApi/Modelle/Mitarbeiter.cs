@@ -13,6 +13,9 @@ namespace PersonalApi.Modelle
         [Required(ErrorMessage = "Nachname ist ein Pflichtfeld")]
         public string Nachname { get; set; } = string.Empty;
 
+        [Required(ErrorMessage ="Das Geburtsdatum ist zwingend erforderlich.")]
+        public DateTime Geburtsdatum { get; set; }
+
         public string Position { get; set; } = string.Empty;
 
         public DateTime Einstellungsdatum { get; set; } = DateTime.Now;

@@ -31,3 +31,9 @@ Entwicklung einer ASP.NET Core REST-API zur Personalverwaltung.
 - Mapping-Profile (`PersonalProfil`) definiert, inkl. komplexer Eigenschaften-Zuweisung (`ForMember`).
 - Controller Refactoring: Manuelles Objekt-Mapping durch sauberes AutoMapper-Mapping ersetzt.
 - Konzept der globalen Fehler-Middleware (`UseDeveloperExceptionPage`) verstanden.
+
+## Lernfortschritt Tag 18
+- Service-Schicht (`PersonalService`) für komplexe Geschäftslogik in die Clean Architecture eingefügt.
+- Domänenspezifische Validierung (Altersprüfung) im Service implementiert.
+- Ausnahmen (`ArgumentException`) im Controller sauber abgefangen und als `400 Bad Request` an den Client zurückgegeben.
+- Code-First-Migration (`GeburtsdatumHinzugefuegt`) durchgeführt, um das SQL-Schema zu aktualisieren.

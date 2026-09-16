@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System;
 using PersonalApi.Zuordnung;
 using PersonalApi.Repositories;
+using PersonalApi.Geschaeftslogik;
 
 namespace PersonalApi;
 
@@ -15,6 +16,8 @@ public class Program
 
         // NEU: Repository im DI-Container registrieren (Scoped = Einmal pro HTTP-Request)
         builder.Services.AddScoped<IPersonalRepository, PersonalRepository>();
+
+        builder.Services.AddScoped<IPersonalService, PersonalService>();
 
         // Datenbankkontext zum Dependency Injection Container hinzufügen.
         // Er liest den Connection-String aus der appsettings.json aus.
@@ -45,7 +48,15 @@ public class Program
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseDeveloperExceptionPage();
+
         }
+        else
+        {
+            app.UseExceptionHandler("/Fehler");
+        }
+
+
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();

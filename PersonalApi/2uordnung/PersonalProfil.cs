@@ -10,10 +10,12 @@ public class PersonalProfil : Profile
     {
         CreateMap<MitarbeiterErstellenDto, Mitarbeiter>();
         CreateMap<Mitarbeiter, MitarbeiterAntwortDto>();
-        CreateMap<Mitarbeiter, MitarbeiterAntwortDto>().ForMember(
-                        ziel => ziel.VollerName,
-                        optionen => optionen.MapFrom(quelle => $"{quelle.Vorname} {quelle.Nachname}")
-        );
+
+        CreateMap<Mitarbeiter, MitarbeiterAntwortDto>()
+            .ForMember(
+                ziel => ziel.VollerName, 
+                optionen => optionen.MapFrom(quelle => $"{quelle.Vorname} {quelle.Nachname}")
+            );
     }
 }
 

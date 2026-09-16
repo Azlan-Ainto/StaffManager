@@ -10,22 +10,28 @@ namespace PersonalApi.Controllers;
 [ApiController]
 public class PersonalController : ControllerBase
 {
-    private readonly IPersonalRepository personalRepository;
-    private readonly IMapper mapper;
+    private readonly IPersonalRepository _personalRepository;
+    private readonly IPersonalService _personalService;
+    private readonly IMapper _mapper;
 
-    public PersonalController(IPersonalRepository repository,IMapper mapper)
+    public PersonalController(IPersonalRepository repository,IPersonalService personalService, IMapper mapper)
     {
-        personalRepository = repository;
-        this.mapper = mapper;
+
+        _personalRepository = repository;
+
+        _mapper = mapper;
+
+        _personalService = personalService;
     }
 
  
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MitarbeiterAntwortDto>>> Alle_Mitarbeiter_Abrufen_Async()
     {
-        var mitarbeiterListe =  await personalRepository.Hole_Alle_Mitarbeiter_Async();
 
-        var antwortListe =  mapper.Map<List<MitarbeiterAntwortDto>>(mitarbeiterListe);
+        var mitarbeiterListe =  await _personalRepository.Hole_Alle_Mitarbeiter_Async();
+
+        var antwortListe =  _mapper.Map<List<MitarbeiterAntwortDto>>(mitarbeiterListe);
 
         return Ok(antwortListe);
     }
@@ -35,14 +41,14 @@ public class PersonalController : ControllerBase
     public async Task<ActionResult<MitarbeiterAntwortDto>> Mitarbeiter_Abrufen_Async(int arbeiterId)
     {
 
-        var gesuchterMitarbeiter =  await personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+        var gesuchterMitarbeiter =  await _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
 
         if (gesuchterMitarbeiter == null)
         {
             return NotFound($"Mitarbeiter mit ID {arbeiterId} existiert nicht.");
         }
 
-        var antwort = mapper.Map<MitarbeiterAntwortDto>(gesuchterMitarbeiter);
+        var antwort = _mapper.Map<MitarbeiterAntwortDto>(gesuchterMitarbeiter);
 
         return Ok(antwort);
     }
@@ -51,17 +57,18 @@ public class PersonalController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<MitarbeiterAntwortDto>> Mitarbeiter_Anlegen_Async([FromBody] MitarbeiterErstellenDto neuerArbeiter)
     {
+        try
+        {
+            var antwort = await _personalService.Mitarbeiter_Anlegen_Async(neuerArbeiter);
 
-        var mitarbeiter = mapper.Map<Mitarbeiter>(neuerArbeiter);
+            return CreatedAtAction(nameof(Mitarbeiter_Abrufen_Async), new { arbeiterId = antwort.MitarbeiterId }, antwort);
 
-        await personalRepository.Mitarbeiter_Hinzufuegen_Async(mitarbeiter);
+        }
+        catch (ArgumentException fehler)
+        {
+            return BadRequest(fehler.Message);
 
-        await personalRepository.Aktualisieren_Async();
-
-        var antwort =  mapper.Map<MitarbeiterAntwortDto>(mitarbeiter);
-
-        // Location-Header zeigt auf GET api/Personal/{arbeiterId} des neu angelegten Mitarbeiters
-        return CreatedAtAction(nameof(Mitarbeiter_Abrufen_Async), new { arbeiterId = antwort.MitarbeiterId }, antwort);
+        }
     }
 
 
@@ -74,7 +81,7 @@ public class PersonalController : ControllerBase
             return BadRequest("Die ID in der URL stimmt nicht mit der ID im Datensatz überein.");
         }
 
-        var gesuchterMitarbeiter =  await personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+        var gesuchterMitarbeiter =  await _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
 
 
         if (gesuchterMitarbeiter == null)
@@ -82,9 +89,9 @@ public class PersonalController : ControllerBase
             return NotFound($"Mitarbeiter mit ID {arbeiterId} nicht gefunden.");
         }
 
-        mapper.Map(neueDaten, gesuchterMitarbeiter);
+        _mapper.Map(neueDaten, gesuchterMitarbeiter);
 
-        await personalRepository.Aktualisieren_Async();
+        await _personalRepository.Aktualisieren_Async();
 
         return NoContent();
     }
@@ -94,16 +101,16 @@ public class PersonalController : ControllerBase
     public async Task<IActionResult>  Mitarbeiter_Loeschen_Async(int arbeiterId)
     {
 
-        var gesuchterMitarbeiter = await personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+        var gesuchterMitarbeiter = await _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
 
         if (gesuchterMitarbeiter == null)
         {
             return NotFound($"Mitarbeiter mit ID {arbeiterId} existiert nicht.");
         }
 
-        await personalRepository.Mitarbeiter_Loeschen_Async(gesuchterMitarbeiter);
+        await _personalRepository.Mitarbeiter_Loeschen_Async(gesuchterMitarbeiter);
 
-        await personalRepository.Aktualisieren_Async();
+        await _personalRepository.Aktualisieren_Async();
 
         return NoContent();
     }
