@@ -2,6 +2,7 @@
 using PersonalApi.DTOs;
 using PersonalApi.Modelle;
 using PersonalApi.Repositories;
+using System.Collections.Generic;
 
 namespace PersonalApi.Geschaeftslogik
 {
@@ -9,13 +10,13 @@ namespace PersonalApi.Geschaeftslogik
     {
         private readonly IPersonalRepository _repository;
         private readonly IMapper _mapper;
-        public PersonalService(IPersonalRepository repository , IMapper automapper) 
+
+        public PersonalService(IPersonalRepository repo , IMapper mapper) 
         {
-            _repository = repository;
-            _mapper = automapper;
+            _repository = repo;
+            _mapper = mapper;
         
         }
-
 
 
 
@@ -37,11 +38,25 @@ namespace PersonalApi.Geschaeftslogik
             var neuerkollege = _mapper.Map<Mitarbeiter>(neuerArbeiter);
             
             await _repository.Mitarbeiter_Hinzufuegen_Async(neuerkollege);
-                
+
+            // Speichern, bevor die Antwort erstellt wird:
+            // Die MitarbeiterId vergibt SQL Server erst beim Speichern.
+            await _repository.Aktualisieren_Async();
 
             return _mapper.Map<MitarbeiterAntwortDto>(neuerkollege);
 
 
         }
+
+        public async Task<IEnumerable<MitarbeiterAntwortDto>> Mitarbeiter_suchen_Async(string suchbegriff, string position)
+        {
+
+            var gefundeneMitarbeiter = await _repository.Suche_Mitarbeiter_Async(suchbegriff, position);
+
+            return _mapper.Map<List<MitarbeiterAntwortDto>>(gefundeneMitarbeiter);
+
+
+        }
+
     }
 }

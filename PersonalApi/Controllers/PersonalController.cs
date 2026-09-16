@@ -114,4 +114,15 @@ public class PersonalController : ControllerBase
 
         return NoContent();
     }
+
+    
+    
+    [HttpGet("suche")]
+    public async Task<ActionResult<IEnumerable<MitarbeiterAntwortDto>>> Mitarbeiter_Suchen_Async([FromQuery] string suchebegriff = "", [FromQuery] string position = "")
+    {
+
+        var mitarbeiterliste = await _personalService.Mitarbeiter_suchen_Async(suchebegriff, position);
+
+        return Ok(mitarbeiterliste);
+    }
 }

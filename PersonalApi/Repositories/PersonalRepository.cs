@@ -39,5 +39,27 @@ namespace PersonalApi.Repositories
         {
             datenbankKontext.Mitarbeiter.Remove(mitarbeiter);
         }
+
+        public async Task<IEnumerable<Mitarbeiter>> Suche_Mitarbeiter_Async(string suchbegriff, string position)
+        {
+
+            IQueryable<Mitarbeiter> abfrage = datenbankKontext.Mitarbeiter.AsQueryable();
+
+
+            if (!string.IsNullOrWhiteSpace(suchbegriff))
+
+            {
+                abfrage = abfrage.Where(m => m.Vorname.Contains(suchbegriff) || m.Nachname.Contains(suchbegriff));
+
+            }
+
+            if(!string.IsNullOrWhiteSpace(position))
+            {
+                abfrage = abfrage.Where(m => m.Position == position);
+            }
+            // Deferred Execution (verzögerte Ausführung)
+
+            return await abfrage.ToListAsync();
+        }
     }
 }

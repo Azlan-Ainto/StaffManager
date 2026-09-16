@@ -11,6 +11,7 @@ namespace PersonalApi.Repositories
         Task Mitarbeiter_Hinzufuegen_Async(Mitarbeiter mitarbeiter);
         Task Aktualisieren_Async();
         Task Mitarbeiter_Loeschen_Async(Mitarbeiter mitarbeiter);
+        Task<IEnumerable<Mitarbeiter>> Suche_Mitarbeiter_Async(string suchbegriff, string position);
 
     }
 }
