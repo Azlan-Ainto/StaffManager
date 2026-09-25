@@ -1,20 +1,23 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalApi.DTOs;
+using PersonalApi.Geschaeftslogik;
 using PersonalApi.Modelle;
 using PersonalApi.Repositories;
 
 namespace PersonalApi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class PersonalController : ControllerBase
+public class PersonalCtrl : ControllerBase
 {
     private readonly IPersonalRepository _personalRepository;
     private readonly IPersonalService _personalService;
     private readonly IMapper _mapper;
 
-    public PersonalController(IPersonalRepository repository,IPersonalService personalService, IMapper mapper)
+    public PersonalCtrl(IPersonalRepository repository,IPersonalService personalService, IMapper mapper)
     {
 
         _personalRepository = repository;
@@ -115,14 +118,15 @@ public class PersonalController : ControllerBase
         return NoContent();
     }
 
-    
-    
+
+
+    // Den [HttpGet("suche")] Endpunkt von gestern hiermit ersetzen:
     [HttpGet("suche")]
-    public async Task<ActionResult<IEnumerable<MitarbeiterAntwortDto>>> Mitarbeiter_Suchen_Async([FromQuery] string suchebegriff = "", [FromQuery] string position = "")
+    public async Task<ActionResult<PaginierteAntwortDto<MitarbeiterAntwortDto>>> Mitarbeiter_Suchen_Async([FromQuery] MitarbeiterSuchParameterDto suchParameter)
     {
 
-        var mitarbeiterliste = await _personalService.Mitarbeiter_suchen_Async(suchebegriff, position);
+        var ergebnisse = await _personalService.Suche_Und_Paginiere_Mitarbeiter_Async(suchParameter);
 
-        return Ok(mitarbeiterliste);
+        return Ok(ergebnisse);
     }
 }

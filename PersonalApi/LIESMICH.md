@@ -37,3 +37,18 @@ Entwicklung einer ASP.NET Core REST-API zur Personalverwaltung.
 - Domänenspezifische Validierung (Altersprüfung) im Service implementiert.
 - Ausnahmen (`ArgumentException`) im Controller sauber abgefangen und als `400 Bad Request` an den Client zurückgegeben.
 - Code-First-Migration (`GeburtsdatumHinzugefuegt`) durchgeführt, um das SQL-Schema zu aktualisieren.
+
+## Lernfortschritt Tag 19
+- HTTP GET Endpunkt für komplexe Suchanfragen (`/api/personal/suche`) erstellt.
+- Query Strings (Abfrageparameter) mittels `[FromQuery]` im Controller entgegengenommen.
+- Dynamische SQL-Abfragen mit `IQueryable<T>` im Repository implementiert.
+- Verzögerte Ausführung (Deferred Execution) genutzt, um Out-of-Memory-Probleme bei großen Datenmengen zu verhindern.
+- SQL-Übersetzung im `DebugView` von EF Core analysiert.
+
+
+## Lernfortschritt Tag 21
+- Web-API mit JSON Web Tokens (JWT) gegen unbefugten Zugriff abgesichert.
+- `AuthCtlr` zur Erzeugung digital signierter Tokens implementiert.
+- `[Authorize]`-Attribut zum Sperren von API-Endpunkten genutzt.
+- Swagger-UI konfiguriert, um `Bearer`-Tokens im HTTP-Header zu übertragen.
+- Identität des Aufrufers über `User.Identity` aus dem Token im Controller ausgelesen.

@@ -20,7 +20,9 @@ namespace PersonalApi.Geschaeftslogik
 
 
 
-        public async Task<MitarbeiterAntwortDto> Mitarbeiter_Anlegen_Async(MitarbeiterErstellenDto neuerArbeiter)
+        public async Task<MitarbeiterAntwortDto> Mitarbeiter_Anlegen_Async(
+            MitarbeiterErstellenDto neuerArbeiter
+        )
         {
 
             int alter = DateTime.Today.Year - neuerArbeiter.Geburtsdatum.Year;
@@ -32,7 +34,8 @@ namespace PersonalApi.Geschaeftslogik
 
             if (alter < 18)
             {
-                throw new ArgumentException("Geschäftsregel verletzt: Der Mitarbeiter muss mindestens 18 Jahre alt sein.");
+                throw new ArgumentException("Geschäftsregel verletzt: " +
+                    "Der Mitarbeiter muss mindestens 18 Jahre alt sein.");
             }
 
             var neuerkollege = _mapper.Map<Mitarbeiter>(neuerArbeiter);
@@ -47,16 +50,23 @@ namespace PersonalApi.Geschaeftslogik
 
 
         }
+        //}
 
-        public async Task<IEnumerable<MitarbeiterAntwortDto>> Mitarbeiter_suchen_Async(string suchbegriff, string position)
+        public async Task<PaginierteAntwortDto<MitarbeiterAntwortDto>> Suche_Und_Paginiere_Mitarbeiter_Async(
+            MitarbeiterSuchParameterDto parameter
+        )
         {
+            var (elemente, gesamtAnzahl) = await _repository.Suche_Und_Paginiere_Mitarbeiter_Async(parameter);
+            
+            var gemappteElemente = _mapper.Map<List<MitarbeiterAntwortDto>>(elemente);
 
-            var gefundeneMitarbeiter = await _repository.Suche_Mitarbeiter_Async(suchbegriff, position);
+            return new PaginierteAntwortDto<MitarbeiterAntwortDto>
+            {
+                Elemente = gemappteElemente,
+               
 
-            return _mapper.Map<List<MitarbeiterAntwortDto>>(gefundeneMitarbeiter);
-
+            };
 
         }
-
     }
 }

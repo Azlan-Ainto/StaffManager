@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonalApi.Datenbank;
+using PersonalApi.DTOs;
 using PersonalApi.Modelle;
 
 namespace PersonalApi.Repositories
@@ -40,26 +41,63 @@ namespace PersonalApi.Repositories
             datenbankKontext.Mitarbeiter.Remove(mitarbeiter);
         }
 
-        public async Task<IEnumerable<Mitarbeiter>> Suche_Mitarbeiter_Async(string suchbegriff, string position)
+
+        public async Task<(IEnumerable<Mitarbeiter> elemente, int Gesamtzahl)> Suche_Und_Paginiere_Mitarbeiter_Async(MitarbeiterSuchParameterDto suchParameterDto)
         {
-
+            
             IQueryable<Mitarbeiter> abfrage = datenbankKontext.Mitarbeiter.AsQueryable();
+            
+            // 1. Filtern
 
-
-            if (!string.IsNullOrWhiteSpace(suchbegriff))
-
+            if(!string.IsNullOrWhiteSpace(suchParameterDto.Suchbegriff))
             {
-                abfrage = abfrage.Where(m => m.Vorname.Contains(suchbegriff) || m.Nachname.Contains(suchbegriff));
+                abfrage = abfrage.Where(m => m.Nachname.Contains(suchParameterDto.Suchbegriff)|| m.Vorname.Contains(suchParameterDto.Suchbegriff));
+            }
+
+            if (!string.IsNullOrWhiteSpace(suchParameterDto.Position))
+            { 
+                abfrage = abfrage.Where(m => m.Position == suchParameterDto.Position);
 
             }
 
-            if(!string.IsNullOrWhiteSpace(position))
-            {
-                abfrage = abfrage.Where(m => m.Position == position);
-            }
-            // Deferred Execution (verzögerte Ausführung)
+            // 2. Sortieren
 
-            return await abfrage.ToListAsync();
+            switch (suchParameterDto.Sortierfeld) 
+            {
+
+                case "nachname":
+
+                    abfrage = suchParameterDto.Aufteigend ? abfrage.OrderBy(m => m.Nachname) : abfrage.OrderByDescending(m => m.Vorname);
+
+                    break;
+
+                case "einstellungsdatum":
+
+                    abfrage = suchParameterDto.Aufteigend ? abfrage.OrderBy(m =>m.Einstellungsdatum) : abfrage.OrderByDescending(m =>m.Einstellungsdatum);
+                    
+                    break;
+
+                default:
+
+                    abfrage = suchParameterDto.Aufteigend ? abfrage.OrderBy(m => m.MitarbeiterId) : abfrage.OrderByDescending(m =>m.MitarbeiterId);
+                    break;
+            
+            }
+            // 3.Zählen
+
+            int gesamtZahl = await abfrage.CountAsync();
+
+            // 4.Paginieren
+
+            int ueberspringen = (suchParameterDto.Seite - 1) * suchParameterDto.SeitenGroesse;
+
+            // 5. Daten aus Datenbank laden
+
+            var ergebnisse = await abfrage.ToListAsync();
+
+            return (ergebnisse, gesamtZahl);
+
+
         }
     }
 }

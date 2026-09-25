@@ -1,4 +1,5 @@
-﻿using PersonalApi.Modelle;
+﻿using PersonalApi.DTOs;
+using PersonalApi.Modelle;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,7 +12,8 @@ namespace PersonalApi.Repositories
         Task Mitarbeiter_Hinzufuegen_Async(Mitarbeiter mitarbeiter);
         Task Aktualisieren_Async();
         Task Mitarbeiter_Loeschen_Async(Mitarbeiter mitarbeiter);
-        Task<IEnumerable<Mitarbeiter>> Suche_Mitarbeiter_Async(string suchbegriff, string position);
+    
+        Task<(IEnumerable<Mitarbeiter> elemente, int Gesamtzahl)> Suche_Und_Paginiere_Mitarbeiter_Async(MitarbeiterSuchParameterDto suchParameterDto);
 
     }
 }
