@@ -17,13 +17,13 @@ public class PersonalCtrl : ControllerBase
     private readonly IPersonalService _personalService;
     private readonly IMapper _mapper;
 
-    public PersonalCtrl(IPersonalRepository repository,IPersonalService personalService, IMapper mapper)
-    {
-
+    public PersonalCtrl(
+        IPersonalRepository repository,
+        IPersonalService personalService, 
+        IMapper mapper
+    ){
         _personalRepository = repository;
-
         _mapper = mapper;
-
         _personalService = personalService;
     }
 
@@ -31,10 +31,10 @@ public class PersonalCtrl : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MitarbeiterAntwortDto>>> Alle_Mitarbeiter_Abrufen_Async()
     {
-
-        var mitarbeiterListe =  await _personalRepository.Hole_Alle_Mitarbeiter_Async();
-
-        var antwortListe =  _mapper.Map<List<MitarbeiterAntwortDto>>(mitarbeiterListe);
+        var mitarbeiterListe =  await 
+            _personalRepository.Hole_Alle_Mitarbeiter_Async();
+        var antwortListe =  
+            _mapper.Map<List<MitarbeiterAntwortDto>>(mitarbeiterListe);
 
         return Ok(antwortListe);
     }
@@ -44,7 +44,8 @@ public class PersonalCtrl : ControllerBase
     public async Task<ActionResult<MitarbeiterAntwortDto>> Mitarbeiter_Abrufen_Async(int arbeiterId)
     {
 
-        var gesuchterMitarbeiter =  await _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+        var gesuchterMitarbeiter =  await 
+            _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
 
         if (gesuchterMitarbeiter == null)
         {
@@ -56,15 +57,22 @@ public class PersonalCtrl : ControllerBase
         return Ok(antwort);
     }
 
- 
+
+    [Authorize(Roles ="Admin")]
     [HttpPost]
-    public async Task<ActionResult<MitarbeiterAntwortDto>> Mitarbeiter_Anlegen_Async([FromBody] MitarbeiterErstellenDto neuerArbeiter)
-    {
+    public async Task<ActionResult<MitarbeiterAntwortDto>> Mitarbeiter_Anlegen_Async(
+            [FromBody] 
+        MitarbeiterErstellenDto neuerArbeiter
+    ){
         try
         {
-            var antwort = await _personalService.Mitarbeiter_Anlegen_Async(neuerArbeiter);
+            var antwort = await
+                _personalService.Mitarbeiter_Anlegen_Async(neuerArbeiter);
 
-            return CreatedAtAction(nameof(Mitarbeiter_Abrufen_Async), new { arbeiterId = antwort.MitarbeiterId }, antwort);
+            return CreatedAtAction(
+                nameof(Mitarbeiter_Abrufen_Async),
+                new { arbeiterId = antwort.MitarbeiterId }, 
+                antwort);
 
         }
         catch (ArgumentException fehler)
@@ -74,17 +82,22 @@ public class PersonalCtrl : ControllerBase
         }
     }
 
-
+    [Authorize(Roles ="Admin")]
     [HttpPut("{arbeiterId}")]
-    public async Task<IActionResult> Mitarbeiter_Aktualisieren_Async(int arbeiterId, [FromBody] MitarbeiterAktualisierenDto neueDaten)
-    {
+    public async Task<IActionResult> Mitarbeiter_Aktualisieren_Async(
+        int arbeiterId, 
+        [FromBody] MitarbeiterAktualisierenDto neueDaten
+        
+    ) {
 
         if (arbeiterId != neueDaten.MitarbeiterId)
         {
-            return BadRequest("Die ID in der URL stimmt nicht mit der ID im Datensatz überein.");
+            return BadRequest("Die ID in der URL stimmt " +
+                "nicht mit der ID im Datensatz überein.");
         }
 
-        var gesuchterMitarbeiter =  await _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+        var gesuchterMitarbeiter =  await 
+            _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
 
 
         if (gesuchterMitarbeiter == null)
@@ -99,12 +112,12 @@ public class PersonalCtrl : ControllerBase
         return NoContent();
     }
 
-
+    [Authorize(Roles ="Admin")]
     [HttpDelete("{arbeiterId}")]
     public async Task<IActionResult>  Mitarbeiter_Loeschen_Async(int arbeiterId)
     {
-
-        var gesuchterMitarbeiter = await _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
+        var gesuchterMitarbeiter = await 
+            _personalRepository.Hole_Mitarbeiter_Nach_Id_Async(arbeiterId);
 
         if (gesuchterMitarbeiter == null)
         {
@@ -119,13 +132,15 @@ public class PersonalCtrl : ControllerBase
     }
 
 
-
     // Den [HttpGet("suche")] Endpunkt von gestern hiermit ersetzen:
     [HttpGet("suche")]
-    public async Task<ActionResult<PaginierteAntwortDto<MitarbeiterAntwortDto>>> Mitarbeiter_Suchen_Async([FromQuery] MitarbeiterSuchParameterDto suchParameter)
-    {
+    public async Task<ActionResult<PaginierteAntwortDto<MitarbeiterAntwortDto>>> Mitarbeiter_Suchen_Async(
+        [FromQuery] 
+        MitarbeiterSuchParameterDto suchParameter
+    ){
 
-        var ergebnisse = await _personalService.Suche_Und_Paginiere_Mitarbeiter_Async(suchParameter);
+        var ergebnisse = await 
+            _personalService.Suche_Und_Paginiere_Mitarbeiter_Async(suchParameter);
 
         return Ok(ergebnisse);
     }
