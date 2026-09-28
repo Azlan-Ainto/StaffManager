@@ -15,15 +15,44 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        // ------------------------------------------------------------
+        // Cross-Origin Resource Sharing (CORS): Aufheben der Wb Speere
+        // ------------------------------------------------------------
+
+        //builder.Services.AddCors(            
+        //    optionen => {
+        //        optionen.AddPolicy(
+        //            "FrontendRichtlinie",
+        //            richtlinie => {
+        //                richtlinie.WithOrigins(
+        //                    "https://localhost/7001",
+        //                    "http://localhost/7000"
+        //                ).AllowAnyHeader()
+        //                .AllowAnyMethod();
+        //            }
+        //        );
+        //    }          
+        //);
+
+
+        builder.Services.AddCors(
+                optionen => {
+                    optionen.AddPolicy(
+                        "FrontendRichtlinie",
+                        richtlinie => {
+                            richtlinie.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                        }
+                    );
+                }
+            );
+
+
 
         // ------------------------------------------------------------
         // Dependency Injection
         // ------------------------------------------------------------
-
         builder.Services.AddScoped<IPersonalRepository, PersonalRepository>();
-
         builder.Services.AddScoped<IPersonalService, PersonalService>();
-
         builder.Services.AddDbContext<PersonalKontext>(
             optionen =>
                 optionen.UseSqlServer(
@@ -32,13 +61,10 @@ public class Program
                     )
                 )
         );
-
         // ------------------------------------------------------------
         // JWT-Authentifizierung
         // ------------------------------------------------------------
-
-        builder.Services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(
                 optionen =>
                 {
@@ -66,18 +92,15 @@ public class Program
                     };
                 }
             );
-
         // ------------------------------------------------------------
         // AutoMapper
         // ------------------------------------------------------------
-
         builder.Services.AddAutoMapper(
             cfg =>
             {
                 cfg.AddProfile<PersonalProfil>();
             }
         );
-
         // ------------------------------------------------------------
         // Controller
         // ------------------------------------------------------------
@@ -88,13 +111,10 @@ public class Program
                 optionen.SuppressAsyncSuffixInActionNames = false;
             }
         );
-
         // ------------------------------------------------------------
         // Swagger
         // ------------------------------------------------------------
-
         builder.Services.AddEndpointsApiExplorer();
-
         builder.Services.AddSwaggerGen(
             options =>
             {
@@ -115,10 +135,7 @@ public class Program
                     document =>
                         new OpenApiSecurityRequirement
                         {
-                            [new OpenApiSecuritySchemeReference(
-                                "Bearer",
-                                document
-                            )] = []
+                            [new OpenApiSecuritySchemeReference("Bearer",document)] = []
                         }
                 );
             }
@@ -127,13 +144,10 @@ public class Program
         // ------------------------------------------------------------
         // Anwendung erstellen
         // ------------------------------------------------------------
-
         var app = builder.Build();
-
         // ------------------------------------------------------------
         // Swagger
         // ------------------------------------------------------------
-
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -144,31 +158,23 @@ public class Program
         {
             app.UseExceptionHandler("/Fehler");
         }
-
         // ------------------------------------------------------------
         // HTTPS
         // ------------------------------------------------------------
 
         app.UseHttpsRedirection();
-
         // ------------------------------------------------------------
         // Authentifizierung + Autorisierung
         // ------------------------------------------------------------
-
         app.UseAuthentication();
-
         app.UseAuthorization();
-
         // ------------------------------------------------------------
         // Controller
         // ------------------------------------------------------------
-
         app.MapControllers();
-
         // ------------------------------------------------------------
         // Anwendung starten
         // ------------------------------------------------------------
-
         app.Run();
     }
 }

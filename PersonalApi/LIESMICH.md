@@ -52,3 +52,11 @@ Entwicklung einer ASP.NET Core REST-API zur Personalverwaltung.
 - `[Authorize]`-Attribut zum Sperren von API-Endpunkten genutzt.
 - Swagger-UI konfiguriert, um `Bearer`-Tokens im HTTP-Header zu übertragen.
 - Identität des Aufrufers über `User.Identity` aus dem Token im Controller ausgelesen.
+
+
+## Lernfortschritt Tag 23
+- Same-Origin-Policy (SOP) Prinzipien im Kontext von Browser-Sicherheit verstanden.
+- Cross-Origin Resource Sharing (CORS) in ASP.NET Core (`AddCors`, `UseCors`) konfiguriert.
+- Spezifische Origins für das zukünftige Web-Frontend (Projekt 4 und 5) autorisiert.
+- Middleware-Pipeline (Reihenfolge von CORS, Authentication und Authorization) korrekt strukturiert.
+- HTTP-Response-Header (`Access-Control-Allow-Origin`) über die Browser-Entwicklertools analysiert.

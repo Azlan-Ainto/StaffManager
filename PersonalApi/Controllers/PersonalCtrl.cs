@@ -121,12 +121,15 @@ public class PersonalCtrl : ControllerBase
 
         if (gesuchterMitarbeiter == null)
         {
-            return NotFound($"Mitarbeiter mit ID {arbeiterId} existiert nicht.");
+            return 
+                NotFound($"Mitarbeiter mit ID {arbeiterId} existiert nicht.");
         }
 
-        await _personalRepository.Mitarbeiter_Loeschen_Async(gesuchterMitarbeiter);
+        await 
+            _personalRepository.Mitarbeiter_Loeschen_Async(gesuchterMitarbeiter);
 
-        await _personalRepository.Aktualisieren_Async();
+        await 
+            _personalRepository.Aktualisieren_Async();
 
         return NoContent();
     }
